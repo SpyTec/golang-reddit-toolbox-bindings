@@ -5,20 +5,19 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"log"
 )
 
 type Usernote struct {
-	Timestamp int    `json:t`
-	Note      string `json:n`
-	Moderator int    `json:m`
-	Warning   int    `json:w`
-	Link      string `json:l`
+	T int
+	N string
+	M int
+	W int
+	L string
 }
 
 type UsernoteList struct {
-	Notes []Usernote `json:ns`
+	Ns []Usernote
 }
 
 type User string
@@ -28,7 +27,6 @@ type UsernoteBlob map[User]UsernoteList
 func (ub *UsernoteBlob) UnmarshalJSON(b []byte) error {
 	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(b)))
 	_, err := base64.StdEncoding.Decode(decoded, b[1:len(b)-1])
-	fmt.Println(string(b[:50]))
 	if err != nil {
 		return nil
 	}
@@ -39,8 +37,7 @@ func (ub *UsernoteBlob) UnmarshalJSON(b []byte) error {
 		log.Fatal(err)
 	}
 	buf.ReadFrom(r)
-	// buf, err := ioutil.ReadAll(r)
-	if err := json.Unmarshal(buf.Bytes(), &ub); err != nil {
+	if err := json.Unmarshal(buf.Bytes(), ub); err != nil {
 		return err
 	}
 	return nil
@@ -61,7 +58,6 @@ func NewUsernoteManager(rawUsernotes []byte) *UsernoteManager {
 	var usernoteManager UsernoteManager
 	err := json.Unmarshal(rawUsernotes, &usernoteManager)
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	return &usernoteManager
