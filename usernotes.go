@@ -9,15 +9,15 @@ import (
 )
 
 type Usernote struct {
-	T int
-	N string
-	M int
-	W int
-	L string
+	Time      int    `json:"t"`
+	Note      string `json:"n"`
+	Moderator int    `json:"m"`
+	Warning   int    `json:"w"`
+	Link      string `json:"l"`
 }
 
 type UsernoteList struct {
-	Ns []Usernote
+	Notes []Usernote `json:"ns"`
 }
 
 type User string
@@ -37,9 +37,11 @@ func (ub *UsernoteBlob) UnmarshalJSON(b []byte) error {
 		log.Fatal(err)
 	}
 	buf.ReadFrom(r)
-	if err := json.Unmarshal(buf.Bytes(), ub); err != nil {
+	var blob map[User]UsernoteList
+	if err := json.Unmarshal(buf.Bytes(), &blob); err != nil {
 		return err
 	}
+	*ub = blob
 	return nil
 }
 
